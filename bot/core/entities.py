@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from time import time
 from bot.config.config import settings
+from enum import Enum
 
 
 @dataclass
@@ -135,3 +136,14 @@ class Config:
 
     def __init__(self, data: dict):
         self.daily_cipher = DailyCipher(data=data["dailyCipher"])
+
+class SleepReason(Enum):
+    WAIT_UPGRADE_COOLDOWN = 1
+    WAIT_UPGRADE_MONEY = 2
+    WAIT_ENERGY_RECOVER = 3
+
+@dataclass
+class Sleep:
+    delay: int
+    sleep_reason: SleepReason
+    created_time: int = time()

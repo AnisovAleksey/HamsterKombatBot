@@ -12,7 +12,7 @@ from aiohttp_proxy import ProxyConnector
 
 
 from bot.config import settings
-from bot.core.entities import Upgrade, Profile, Boost, Task, Config, DailyCombo
+from bot.core.entities import Upgrade, Profile, Boost, Task, Config, DailyCombo, Sleep, SleepReason
 from bot.core.web_client import WebClient
 
 from .headers import headers
@@ -27,21 +27,14 @@ class Tapper:
         self.boosts: list[Boost] = []
         self.tasks: list[Task] = []
         self.daily_combo: DailyCombo = []
-        self.preferred_sleep_time = 0
+        self.preferred_sleep: Sleep | None = None
         
-    def update_profile_params(self, data: dict) -> None:
-        self.profile = Profile(data=data)
+    def update_preferred_sleep(self, sleep: Sleep):
+        if self.preferred_sleep is None or sleep.delay < self.preferred_sleep.delay:
+            self.preferred_sleep = sleep
 
     async def earn_money(self):
         profile = await self.web_client.get_profile_data()
-
-
-        if not profile:
-            return False
-        
-        
-        if not profile:
-            return False
         
         self.profile = profile
         
@@ -86,7 +79,10 @@ class Tapper:
             for upgrade in combo_upgrades:
                 if upgrade.price > self.profile.getSpendingBalance():
                     logger.info(f"{self.session_name} | Not enough money for upgrade <e>{upgrade.name}</e>")
-                    self.preferred_sleep_time = int((upgrade.price - self.profile.getSpendingBalance()) / self.profile.earn_per_sec) + 2
+                    self.update_preferred_sleep(Sleep(
+                        delay=int((upgrade.price - self.profile.getSpendingBalance()) / self.profile.earn_per_sec),
+                        sleep_reason=SleepReason.WAIT_UPGRADE_MONEY
+                    ))
                     return True
 
                 await self.do_upgrade(upgrade=upgrade)
@@ -125,12 +121,18 @@ class Tapper:
 
             if most_profit_upgrade.price > self.profile.getSpendingBalance():
                 logger.info(f"{self.session_name} | Not enough money for upgrade <e>{most_profit_upgrade.name}</e>")
-                self.preferred_sleep_time = int((most_profit_upgrade.price - self.profile.getSpendingBalance()) / self.profile.earn_per_sec) + 2
+                self.update_preferred_sleep(Sleep(
+                    delay=int((most_profit_upgrade.price - self.profile.getSpendingBalance()) / self.profile.earn_per_sec),
+                    sleep_reason=SleepReason.WAIT_UPGRADE_MONEY
+                ))
                 break
 
             if most_profit_upgrade.cooldown_seconds > 0:
                 logger.info(f"{self.session_name} | Upgrade <e>{most_profit_upgrade.name}</e> on cooldown")
-                self.preferred_sleep_time = most_profit_upgrade.cooldown_seconds + 2
+                self.update_preferred_sleep(Sleep(
+                    delay=most_profit_upgrade.cooldown_seconds,
+                    sleep_reason=SleepReason.WAIT_UPGRADE_COOLDOWN
+                ))
                 break
 
             await self.do_upgrade(upgrade=most_profit_upgrade)
@@ -154,11 +156,10 @@ class Tapper:
             return False
 
         profile = await self.web_client.apply_boost(boost_id="BoostFullAvailableTaps")
-        if profile is not None:
-            self.profile = profile
-            logger.success(f"{self.session_name} | Successfully apply energy boost")
-            return True
-        return False
+
+        self.profile = profile
+        logger.success(f"{self.session_name} | Successfully apply energy boost")
+        return True
 
     async def make_taps(self) -> bool:
         available_taps = self.profile.getAvailableTaps()
@@ -178,9 +179,6 @@ class Tapper:
         await self.sleep(delay=sleep_time)
 
         profile = await self.web_client.send_taps(available_energy=current_energy, taps=simulated_taps)
-
-        if not profile:
-            return False
         
         new_balance = int(profile.balance)
         calc_taps = new_balance - self.profile.balance
@@ -217,8 +215,7 @@ class Tapper:
                 self.tasks = await self.web_client.get_tasks()
 
                 # DAILY CIPHER
-                if config is not None:
-                    await self.check_daily_cipher(config=config)
+                await self.check_daily_cipher(config=config)
 
                 # TASKS COMPLETING
                 for task in self.tasks:
@@ -247,33 +244,31 @@ class Tapper:
                         await self.sleep(delay=5)
                         if await self.apply_energy_boost():
                             await self.make_taps()
+                    
+                    self.update_preferred_sleep(Sleep(
+                        delay=(self.profile.max_energy - self.profile.available_energy) / self.profile.energy_recover_per_sec,
+                        sleep_reason=SleepReason.WAIT_ENERGY_RECOVER
+                    ))
                             
                 # UPGRADES
                 if settings.AUTO_UPGRADE is True:
                     await self.make_upgrades()
 
                 # SLEEP
-                sleep_time_to_recover_energy = (self.profile.max_energy - self.profile.available_energy) / self.profile.energy_recover_per_sec
+                if self.preferred_sleep is not None:
+                    sleep_time=max(self.preferred_sleep.delay - (time() - self.preferred_sleep.created_time), 40)
+                    if self.preferred_sleep.sleep_reason == SleepReason.WAIT_UPGRADE_MONEY:
+                        logger.info(f"{self.session_name} | Sleep {sleep_time}s for earn money for upgrades")
+                    elif self.preferred_sleep.sleep_reason == SleepReason.WAIT_UPGRADE_COOLDOWN:
+                        logger.info(f"{self.session_name} | Sleep {sleep_time}s for waiting cooldown for upgrades")
+                    elif self.preferred_sleep.sleep_reason == SleepReason.WAIT_ENERGY_RECOVER:
+                        logger.info(f"{self.session_name} | Sleep {sleep_time}s for recover full energy")
 
-                if settings.AUTO_CLICKER is True:
-                    if self.preferred_sleep_time != 0 and self.preferred_sleep_time < sleep_time_to_recover_energy:
-                        logger.info(f"{self.session_name} | Sleep {self.preferred_sleep_time}s for earn money for upgrades")
-                        await self.sleep(delay=self.preferred_sleep_time)
-                    elif sleep_time_to_recover_energy > 0:
-                        logger.info(f"{self.session_name} | Sleep {sleep_time_to_recover_energy}s for recover full energy")
-                        await self.sleep(delay=sleep_time_to_recover_energy)
-                    else:
-                        logger.info(f"{self.session_name} | Sleep 3600s before next iteration")
-                        await self.sleep(delay=3600)
+                    self.preferred_sleep = None
+                    await self.sleep(delay=sleep_time)
                 else:
-                    if self.preferred_sleep_time != 0:
-                        logger.info(f"{self.session_name} | Sleep {self.preferred_sleep_time}s for earn money for upgrades")
-                        await self.sleep(delay=self.preferred_sleep_time)
-                    else:
-                        logger.info(f"{self.session_name} | Sleep 3600s before next iteration")
-                        await self.sleep(delay=3600)
-                
-                self.preferred_sleep_time = 0
+                    logger.info(f"{self.session_name} | Sleep 3600s before next iteration")
+                    await self.sleep(delay=3600)
 
             except InvalidSession as error:
                 raise error
