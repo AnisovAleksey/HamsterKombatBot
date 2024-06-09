@@ -43,7 +43,7 @@ class Tapper:
             if status is True:
                 logger.success(f"{self.session_name} | Successfully selected exchange <y>Bybit</y>")
 
-        logger.info(f"{self.session_name} | Last passive earn: <g>+{self.profile.last_passive_earn}</g> | "
+        logger.info(f"{self.session_name} | Last passive earn: <g>+{self.profile.last_passive_earn}</g> id: {self.profile.id} | "
                     f"Earn every hour: <y>{self.profile.earn_per_hour}</y>")
 
     async def check_daily_cipher(self, config: Config):
@@ -74,7 +74,7 @@ class Tapper:
 
             for upgrade in combo_upgrades:
                 if not upgrade.can_upgrade():
-                    logger.info(f"{self.session_name} | Can't upgrade <e>{upgrade.name}</e> for daily combo. Skipped")
+                    logger.info(f"{self.session_name} | Can't upgrade <e>{upgrade.name}</e> for daily combo. Condition <e>{upgrade.condition}</e>. Skipped")
                     return False
             for upgrade in combo_upgrades:
                 if upgrade.price > self.profile.getSpendingBalance():
