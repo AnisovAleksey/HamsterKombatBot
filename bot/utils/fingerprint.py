@@ -64,7 +64,7 @@ FINGERPRINT = {
             0,
             0
             ],
-            'duration': randint(2, 7)
+            'duration': random.randint(2, 7)
         },
         'canvas': None,
         'osCpu': {
