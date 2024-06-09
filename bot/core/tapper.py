@@ -74,7 +74,7 @@ class Tapper:
 
             for upgrade in combo_upgrades:
                 if not upgrade.can_upgrade():
-                    logger.info(f"{self.session_name} | Can't upgrade <e>{upgrade.name}</e> for daily combo. Skipped")
+                    logger.info(f"{self.session_name} | Can't upgrade <e>{upgrade.name}</e> for daily combo. Condition <e>{upgrade.condition}</e>. Skipped")
                     return False
             for upgrade in combo_upgrades:
                 if upgrade.price > self.profile.getSpendingBalance():
