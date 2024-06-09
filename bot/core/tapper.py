@@ -43,7 +43,7 @@ class Tapper:
             if status is True:
                 logger.success(f"{self.session_name} | Successfully selected exchange <y>Bybit</y>")
 
-        logger.info(f"{self.session_name} | Last passive earn: <g>+{self.profile.last_passive_earn}</g> | "
+        logger.info(f"{self.session_name} | Last passive earn: <g>+{self.profile.last_passive_earn}</g> id: {self.profile.id} | "
                     f"Earn every hour: <y>{self.profile.earn_per_hour}</y>")
 
     async def check_daily_cipher(self, config: Config):
