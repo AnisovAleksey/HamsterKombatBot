@@ -62,7 +62,7 @@ async def register_client_by_tg_auth() -> None:
 
 async def get_tg_web_data(client_name) -> str:
     tg_client = TgClient(
-        name=client_name
+        name=client_name,
         api_id=settings.API_ID,
         api_hash=settings.API_HASH
     )
