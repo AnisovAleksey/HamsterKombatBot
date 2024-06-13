@@ -1,5 +1,4 @@
-
-# Guide on extracting authorization Information on Android
+# Guide on extracting authorization information on Android
 
 ## Steps
 
