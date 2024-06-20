@@ -47,8 +47,8 @@ class Tapper:
             if status is True:
                 logger.success(f"{self.session_name} | Successfully selected exchange <y>Bybit</y>")
 
-        logger.info(f"{self.session_name} | Last passive earn: <g>+{self.profile.last_passive_earn}</g> | "
-                    f"Earn every hour: <y>{self.profile.earn_per_hour}</y>")
+        logger.info(f"{self.session_name} | Last passive earn: <g>+{self.profile.last_passive_earn:,}</g> | "
+                    f"Earn every hour: <y>{self.profile.earn_per_hour:,}</y>")
 
     async def check_daily_cipher(self, config: Config):
         if config.daily_cipher.is_claimed:
@@ -58,7 +58,7 @@ class Tapper:
             "utf-8")
         self.profile = await self.web_client.claim_daily_cipher(cipher=decoded_cipher)
         logger.success(f"{self.session_name} | Successfully get cipher reward | "
-                       f"Cipher: <m>{decoded_cipher}</m> | Reward coins: <g>+{config.daily_cipher.bonus_coins}</g>")
+                       f"Cipher: <m>{decoded_cipher}</m> | Reward coins: <g>+{config.daily_cipher.bonus_coins:,}</g>")
         await self.sleep(delay=5)
 
     async def check_daily_combo(self):
@@ -80,7 +80,7 @@ class Tapper:
                     return False
             for upgrade in combo_upgrades:
                 if upgrade.price > self.profile.get_spending_balance():
-                    logger.info(f"{self.session_name} | Not enough money for upgrade <e>{upgrade.name}</e>")
+                    logger.info(f"{self.session_name} | Not enough money for upgrade <e>{upgrade.name}</e> with price <g>{upgrade.price:,}</g> | Balance: <c>{self.profile.balance:,}</c>")
                     delay=int((upgrade.price - self.profile.get_spending_balance()) / self.profile.earn_per_sec)
                     if delay > 10500:  
                         delay = random.randint(3120, 7200)
@@ -100,7 +100,7 @@ class Tapper:
             return False
         self.profile = await self.web_client.claim_daily_combo()
         logger.success(f"{self.session_name} | Successfully get daily combo reward | "
-                       f"Reward coins: <g>+{self.daily_combo.bonus_coins}</g>")
+                       f"Reward coins: <g>+{self.daily_combo.bonus_coins:,}</g>")
         await self.sleep(delay=5)
         return True
 
@@ -127,7 +127,7 @@ class Tapper:
             most_profit_upgrade: Upgrade = available_upgrades[0]
 
             if most_profit_upgrade.price > self.profile.get_spending_balance():
-                logger.info(f"{self.session_name} | Not enough money for upgrade <e>{most_profit_upgrade.name}</e>")
+                logger.info(f"{self.session_name} | Not enough money for upgrade <e>{most_profit_upgrade.name}</e> with price <g>{most_profit_upgrade.price:,}</g> | Balance: <c>{self.profile.balance:,}</c>")
                 delay = int((most_profit_upgrade.price - self.profile.get_spending_balance()) / self.profile.earn_per_sec)
                 if delay > 10500:  
                     delay = random.randint(3120, 7200)  
@@ -158,8 +158,8 @@ class Tapper:
 
         logger.success(
             f"{self.session_name} | "
-            f"Successfully upgraded <e>{upgrade.name}</e> to <m>{upgrade.level}</m> lvl | "
-            f"Earn every hour: <y>{self.profile.earn_per_hour}</y> (<g>+{upgrade.earn_per_hour}</g>)")
+            f"Successfully upgraded <e>{upgrade.name}</e> to <m>{upgrade.level}</m> lvl with price <g>{upgrade.price:,}</g> | "
+            f"Earn every hour: <y>{self.profile.earn_per_hour:,}</y> (<g>+{upgrade.earn_per_hour:,}</g>)")
 
     async def apply_energy_boost(self) -> bool:
         energy_boost = next((boost for boost in self.boosts if boost.id == 'BoostFullAvailableTaps'), {})
@@ -202,7 +202,7 @@ class Tapper:
         self.profile = profile
 
         logger.success(f"{self.session_name} | Successful tapped <c>{simulated_taps}</c> times! | "
-                       f"Balance: <c>{self.profile.balance}</c> (<g>+{calc_taps}</g>)")
+                       f"Balance: <c>{self.profile.balance:,}</c> (<g>+{calc_taps:,}</g>)")
         return True
 
     async def sleep(self, delay: int):
@@ -244,10 +244,10 @@ class Tapper:
                         if task.id == "streak_days":
                             logger.success(f"{self.session_name} | Successfully get daily reward | "
                                            f"Days: <m>{task.days}</m> | "
-                                           f"Balance: <c>{self.profile.balance}</c> (<g>+{task.reward_coins}</g>)")
+                                           f"Balance: <c>{self.profile.balance:,}</c> (<g>+{task.reward_coins:,}</g>)")
                         else:
                             logger.success(f"{self.session_name} | Successfully get reward for task <m>{task.id}</m> | "
-                                           f"Balance: <c>{self.profile.balance}</c> (<g>+{task.reward_coins}</g>)")
+                                           f"Balance: <c>{self.profile.balance:,}</c> (<g>+{task.reward_coins:,}</g>)")
 
                 # TAPPING
                 if settings.AUTO_CLICKER is True:
