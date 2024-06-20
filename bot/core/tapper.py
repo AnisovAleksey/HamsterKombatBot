@@ -4,6 +4,7 @@ import asyncio
 import base64
 import datetime
 import traceback
+import random
 from random import randint
 from time import time
 
@@ -80,8 +81,11 @@ class Tapper:
             for upgrade in combo_upgrades:
                 if upgrade.price > self.profile.get_spending_balance():
                     logger.info(f"{self.session_name} | Not enough money for upgrade <e>{upgrade.name}</e>")
+                    delay=int((upgrade.price - self.profile.get_spending_balance()) / self.profile.earn_per_sec)
+                    if delay > 10500:  
+                        delay = random.randint(3120, 7200)
                     self.update_preferred_sleep(
-                        delay=int((upgrade.price - self.profile.get_spending_balance()) / self.profile.earn_per_sec),
+                        delay=delay,
                         sleep_reason=SleepReason.WAIT_UPGRADE_MONEY
                     )
                     return True
@@ -124,9 +128,11 @@ class Tapper:
 
             if most_profit_upgrade.price > self.profile.get_spending_balance():
                 logger.info(f"{self.session_name} | Not enough money for upgrade <e>{most_profit_upgrade.name}</e>")
+                delay = int((most_profit_upgrade.price - self.profile.get_spending_balance()) / self.profile.earn_per_sec)
+                if delay > 10500:  
+                    delay = random.randint(3120, 7200)  
                 self.update_preferred_sleep(
-                    delay=int(
-                        (most_profit_upgrade.price - self.profile.get_spending_balance()) / self.profile.earn_per_sec),
+                    delay=delay,
                     sleep_reason=SleepReason.WAIT_UPGRADE_MONEY
                 )
                 break
