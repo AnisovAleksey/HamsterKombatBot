@@ -1,6 +1,7 @@
 import json as json_parser
 from enum import StrEnum
 from time import time
+import datetime
 
 import aiohttp
 from better_proxy import Proxy
@@ -28,6 +29,7 @@ class Requests(StrEnum):
     REFERRAL_STAT = "https://api.hamsterkombat.io/clicker/referral-stat"
     LIST_AIRDROP_TASKS = "https://api.hamsterkombat.io/clicker/list-airdrop-tasks"
     CHECK_AIRDROP_TASK = "https://api.hamsterkombat.io/clicker/check-airdrop-task"
+    DAILY_JSON_URL = "https://anisovaleksey.github.io/HamsterKombatBot/daily_combo.json"
 
 
 class WebClient:
@@ -126,6 +128,22 @@ class WebClient:
     async def get_airdrop_tasks(self) -> list[AirDropTask]:
         response = await self.make_request(Requests.LIST_AIRDROP_TASKS)
         return list(map(lambda d: AirDropTask(data=d), response['airdropTasks']))
+
+    # noinspection PyMethodMayBeStatic
+    async def fetch_daily_combo(self) -> list[str]:
+        async with aiohttp.ClientSession() as http_client:  # we don't need the headers from self.http_client
+            response = await http_client.get(url=Requests.DAILY_JSON_URL)
+            response_json = await response.json()
+            combo = response_json.get('combo')
+            start_combo_date = datetime.datetime \
+                .strptime(response_json.get('date'), "%Y-%m-%d") \
+                .replace(tzinfo=datetime.timezone.utc).replace(hour=12)
+            end_combo_date = start_combo_date + datetime.timedelta(days=1)
+            current_timestamp = time()
+
+            if start_combo_date.timestamp() < current_timestamp < end_combo_date.timestamp():
+                return combo
+            return []
 
     async def make_request(self, request: Requests, json: dict | None = None) -> dict:
         response = await self.http_client.post(url=request,

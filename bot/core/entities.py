@@ -30,8 +30,8 @@ class Profile:
         self.exchange_id = data.get('exchangeId')
         try:
             self.last_energy_boost_time = next(
-                (boost for boost in data["boosts"] if boost['id'] == 'BoostFullAvailableTaps'), {}).get("lastUpgradeAt",
-                                                                                                        0)
+                (boost for boost in data["boosts"] if boost['id'] == 'BoostFullAvailableTaps'), {}
+            ).get("lastUpgradeAt", 0)
         except:
             self.last_energy_boost_time = 0
 

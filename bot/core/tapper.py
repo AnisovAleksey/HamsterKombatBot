@@ -2,7 +2,6 @@
 
 import asyncio
 import base64
-import datetime
 import traceback
 from random import randint
 from time import time
@@ -66,12 +65,13 @@ class Tapper:
             if reward_claimed:
                 return False
 
-            combo = await fetch_daily_combo()
+            combo = await self.web_client.fetch_daily_combo()
             if len(combo) == 0:
                 logger.info(f"{self.session_name} | Daily combo not published")
                 return False
             combo_upgrades: list[Upgrade] = list(
-                filter(lambda u: u.id in combo and u.id not in self.daily_combo.upgrade_ids, self.upgrades))
+                filter(lambda u: u.id in combo and u.id not in self.daily_combo.upgrade_ids, self.upgrades)
+            )
 
             for upgrade in combo_upgrades:
                 if not upgrade.can_upgrade():
@@ -301,22 +301,3 @@ async def run_tapper(client: Client, proxy: str | None):
             await Tapper(web_client=web_client).run()
     except InvalidSession:
         logger.error(f"{client.name} | Invalid Session")
-
-
-DAILY_JSON_URL = "https://anisovaleksey.github.io/HamsterKombatBot/daily_combo.json"
-
-
-async def fetch_daily_combo() -> list[str]:
-    async with aiohttp.ClientSession() as http_client:
-        response = await http_client.get(url=DAILY_JSON_URL)
-        response_json = await response.json()
-        combo = response_json.get('combo')
-        start_combo_date = datetime.datetime \
-            .strptime(response_json.get('date'), "%Y-%m-%d") \
-            .replace(tzinfo=datetime.timezone.utc).replace(hour=12)
-        end_combo_date = start_combo_date + datetime.timedelta(days=1)
-        current_timestamp = time()
-
-        if start_combo_date.timestamp() < current_timestamp < end_combo_date.timestamp():
-            return combo
-        return []
