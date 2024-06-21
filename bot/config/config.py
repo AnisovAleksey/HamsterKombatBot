@@ -22,5 +22,7 @@ class Settings(BaseSettings):
 
     SLEEP_INTERVAL_BEFORE_UPGRADE: list[int] = [10, 40]
 
+    CHECK_DAILY_COMBO: bool = True
+
 
 settings = Settings()
