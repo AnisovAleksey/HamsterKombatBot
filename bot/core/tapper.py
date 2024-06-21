@@ -30,6 +30,7 @@ class Tapper:
         self.tasks: list[Task] = []
         self.daily_combo: DailyCombo | None = None
         self.preferred_sleep: Sleep | None = None
+        self.check_daily_combo_enabled = settings.CHECK_DAILY_COMBO
 
     def update_preferred_sleep(self, delay: float, sleep_reason: SleepReason):
         if self.preferred_sleep is not None and delay >= self.preferred_sleep.delay:
@@ -62,6 +63,9 @@ class Tapper:
         await self.sleep(delay=5)
 
     async def check_daily_combo(self):
+        if not self.check_daily_combo_enabled:
+            return False
+        
         if not self.daily_combo.is_claimed:
             reward_claimed = await self.try_claim_daily_combo()
             if reward_claimed:
