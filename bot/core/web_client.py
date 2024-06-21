@@ -29,7 +29,6 @@ class Requests(StrEnum):
     REFERRAL_STAT = "https://api.hamsterkombat.io/clicker/referral-stat"
     LIST_AIRDROP_TASKS = "https://api.hamsterkombat.io/clicker/list-airdrop-tasks"
     CHECK_AIRDROP_TASK = "https://api.hamsterkombat.io/clicker/check-airdrop-task"
-    DAILY_JSON_URL = "https://anisovaleksey.github.io/HamsterKombatBot/daily_combo.json"
 
 
 class WebClient:
@@ -132,7 +131,7 @@ class WebClient:
     # noinspection PyMethodMayBeStatic
     async def fetch_daily_combo(self) -> list[str]:
         async with aiohttp.ClientSession() as http_client:  # we don't need the headers from self.http_client
-            response = await http_client.get(url=Requests.DAILY_JSON_URL)
+            response = await http_client.get(url="https://anisovaleksey.github.io/HamsterKombatBot/daily_combo.json")
             response_json = await response.json()
             combo = response_json.get('combo')
             start_combo_date = datetime.datetime \
