@@ -111,10 +111,19 @@ class Tapper:
             if not settings.WAIT_FOR_MOST_PROFIT_UPGRADES:
                 available_upgrades = filter(
                     lambda u: self.profile.get_spending_balance() > u.price and u.cooldown_seconds == 0,
-                    available_upgrades)
+                    available_upgrades
+                )
 
-            available_upgrades = sorted(available_upgrades, key=lambda u: u.calculate_significance(self.profile),
-                                        reverse=False)
+            available_upgrades = sorted(
+                available_upgrades, key=lambda u: u.calculate_significance(self.profile), reverse=False
+            )
+
+            # тут мы получили полный отсортированный список апгрейдов
+            # из него берем топ 10 апгрейтов, которые мы в принципе рассматриваем для обновления(остальные условно считаем не выгодные)
+            # далее из этого списка мы получаем только те апгрейды, которые еще "не раздутые", чтобы не завышать цену еще больше.
+            # это нужно для высоких левелов, когда карточки уже очень дорогие и мы хотим состедоточиться на накоплении баланса,
+            # но так же хотим апать новые, выгодные карточки, которые недавно открылись.
+            available_upgrades = filter(lambda u: u.level < settings.MAX_UPGRADE_LEVEL, available_upgrades[:10])
 
             if len(available_upgrades) == 0:
                 logger.info(f"{self.session_name} | No available upgrades")
