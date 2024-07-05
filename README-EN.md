@@ -20,6 +20,7 @@
 | **APPLY_DAILY_ENERGY**                | Whether to use the daily free energy boost _(True / False)_                                               |
 | **MIN_BALANCE**                       | Minimal balance that always will be available                                                             |
 | **MAX_UPGRADE_LEVEL**                 | Maximum level of a profitable card for upgrade                                                            |
+| **MAX_UPGRADE_PRICE**                 | Maximum price of a profitable card for upgrade                                                            |
 | **MIN_TAPS_FOR_CLICKER_IN_PERCENT**   | Minimum percentage of taps (of the available number) at which the clicker will be launched. _Default 60%_ |
 | **SLEEP_INTERVAL_BEFORE_UPGRADE**     | Sleep before every upgrade. _default: [10, 40]_                                                           |
 | **USE_PROXY_FROM_FILE**               | Whether to use proxy from the `bot/config/proxies.txt` file (True / False)                                |

@@ -123,7 +123,10 @@ class Tapper:
             # далее из этого списка мы получаем только те апгрейды, которые еще "не раздутые", чтобы не завышать цену еще больше.
             # это нужно для высоких левелов, когда карточки уже очень дорогие и мы хотим состедоточиться на накоплении баланса,
             # но так же хотим апать новые, выгодные карточки, которые недавно открылись.
-            available_upgrades = list(filter(lambda u: u.level < settings.MAX_UPGRADE_LEVEL, available_upgrades[:10]))
+            available_upgrades = list(filter(
+                lambda u: u.level < settings.MAX_UPGRADE_LEVEL and u.price < settings.MAX_UPGRADE_PRICE,
+                available_upgrades[:10]
+            ))
 
             if len(available_upgrades) == 0:
                 logger.info(f"{self.session_name} | No available upgrades")
