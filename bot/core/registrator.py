@@ -105,7 +105,7 @@ async def register_client_by_tg_auth() -> None:
 async def auth(tg_client: TgClient) -> str | None:
     tg_web_data = await get_tg_web_data(tg_client)
 
-    response = requests.post(url='https://api.hamsterkombat.io/auth/auth-by-telegram-webapp',
+    response = requests.post(url='https://api.hamsterkombatgame.io/auth/auth-by-telegram-webapp',
                              json={"initDataRaw": tg_web_data, "fingerprint": FINGERPRINT})
 
     return response.json().get('authToken')
@@ -136,7 +136,7 @@ async def get_tg_web_data(tg_client: TgClient) -> str | None:
             bot=peer,
             platform='android',
             from_bot_menu=False,
-            url='https://hamsterkombat.io/'
+            url='https://hamsterkombatgame.io/'
         ))
 
         auth_url = web_view.url

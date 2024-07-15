@@ -12,22 +12,22 @@ from bot.utils.client import Client
 
 
 class Requests(StrEnum):
-    CONFIG = "https://api.hamsterkombat.io/clicker/config"
-    ME_TELEGRAM = "https://api.hamsterkombat.io/auth/me-telegram"
-    TAP = "https://api.hamsterkombat.io/clicker/tap"
-    BOOSTS_FOR_BUY = "https://api.hamsterkombat.io/clicker/boosts-for-buy"
-    BUY_UPGRADE = "https://api.hamsterkombat.io/clicker/buy-upgrade"
-    UPGRADES_FOR_BUY = "https://api.hamsterkombat.io/clicker/upgrades-for-buy"
-    BUY_BOOST = "https://api.hamsterkombat.io/clicker/buy-boost"
-    CHECK_TASK = "https://api.hamsterkombat.io/clicker/check-task"
-    SELECT_EXCHANGE = "https://api.hamsterkombat.io/clicker/select-exchange"
-    LIST_TASKS = "https://api.hamsterkombat.io/clicker/list-tasks"
-    SYNC = "https://api.hamsterkombat.io/clicker/sync"
-    CLAIM_DAILY_CIPHER = "https://api.hamsterkombat.io/clicker/claim-daily-cipher"
-    CLAIM_DAILY_COMBO = "https://api.hamsterkombat.io/clicker/claim-daily-combo"
-    REFERRAL_STAT = "https://api.hamsterkombat.io/clicker/referral-stat"
-    LIST_AIRDROP_TASKS = "https://api.hamsterkombat.io/clicker/list-airdrop-tasks"
-    CHECK_AIRDROP_TASK = "https://api.hamsterkombat.io/clicker/check-airdrop-task"
+    CONFIG = "https://api.hamsterkombatgame.io/clicker/config"
+    ME_TELEGRAM = "https://api.hamsterkombatgame.io/auth/me-telegram"
+    TAP = "https://api.hamsterkombatgame.io/clicker/tap"
+    BOOSTS_FOR_BUY = "https://api.hamsterkombatgame.io/clicker/boosts-for-buy"
+    BUY_UPGRADE = "https://api.hamsterkombatgame.io/clicker/buy-upgrade"
+    UPGRADES_FOR_BUY = "https://api.hamsterkombatgame.io/clicker/upgrades-for-buy"
+    BUY_BOOST = "https://api.hamsterkombatgame.io/clicker/buy-boost"
+    CHECK_TASK = "https://api.hamsterkombatgame.io/clicker/check-task"
+    SELECT_EXCHANGE = "https://api.hamsterkombatgame.io/clicker/select-exchange"
+    LIST_TASKS = "https://api.hamsterkombatgame.io/clicker/list-tasks"
+    SYNC = "https://api.hamsterkombatgame.io/clicker/sync"
+    CLAIM_DAILY_CIPHER = "https://api.hamsterkombatgame.io/clicker/claim-daily-cipher"
+    CLAIM_DAILY_COMBO = "https://api.hamsterkombatgame.io/clicker/claim-daily-combo"
+    REFERRAL_STAT = "https://api.hamsterkombatgame.io/clicker/referral-stat"
+    LIST_AIRDROP_TASKS = "https://api.hamsterkombatgame.io/clicker/list-airdrop-tasks"
+    CHECK_AIRDROP_TASK = "https://api.hamsterkombatgame.io/clicker/check-airdrop-task"
 
 
 class WebClient:

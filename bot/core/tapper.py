@@ -85,7 +85,7 @@ class Tapper:
             for upgrade in combo_upgrades:
                 if upgrade.price > self.profile.get_spending_balance():
                     logger.info(f"{self.session_name} | Not enough money for upgrade <e>{upgrade.name}</e> with price <g>{upgrade.price:,}</g> | Balance: <c>{self.profile.balance:,}</c>")
-                    delay=int((upgrade.price - self.profile.get_spending_balance()) / self.profile.earn_per_sec)
+                    delay=int((upgrade.price - self.profile.get_spending_balance()) / self.profile.earn_per_sec) + random.randint(90, 360)
                     if delay > 10500:  
                         delay = random.randint(3120, 7200)
                     self.update_preferred_sleep(
@@ -132,7 +132,7 @@ class Tapper:
 
             if most_profit_upgrade.price > self.profile.get_spending_balance():
                 logger.info(f"{self.session_name} | Not enough money for upgrade <e>{most_profit_upgrade.name}</e> with price <g>{most_profit_upgrade.price:,}</g> | Balance: <c>{self.profile.balance:,}</c>")
-                delay = int((most_profit_upgrade.price - self.profile.get_spending_balance()) / self.profile.earn_per_sec)
+                delay = int((most_profit_upgrade.price - self.profile.get_spending_balance()) / self.profile.earn_per_sec) + random.randint(90, 360)
                 if delay > 10500:  
                     delay = random.randint(3120, 7200)  
                 self.update_preferred_sleep(
@@ -146,7 +146,7 @@ class Tapper:
                     f"{self.session_name} | "
                     f"Upgrade <e>{most_profit_upgrade.name}</e> on cooldown for <y>{most_profit_upgrade.cooldown_seconds}s</y>")
                 self.update_preferred_sleep(
-                    delay=most_profit_upgrade.cooldown_seconds,
+                    delay=most_profit_upgrade.cooldown_seconds + random.randint(90, 360),
                     sleep_reason=SleepReason.WAIT_UPGRADE_COOLDOWN
                 )
                 break
