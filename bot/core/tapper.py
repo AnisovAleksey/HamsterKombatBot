@@ -313,7 +313,7 @@ async def run_tapper(client: Client, proxy: str | None):
         logger.error(f"{client.name} | Invalid Session")
 
 
-DAILY_JSON_URL = "https://anisovaleksey.github.io/HamsterKombatBot/daily_combo.json"
+DAILY_JSON_URL = "https://xpacl.github.io/HamsterKombatBot/daily_combo.json"
 
 
 async def fetch_daily_combo() -> list[str]:
