@@ -7,6 +7,7 @@ from bot.config.config import settings
 # pylint: disable=R0902
 @dataclass
 class Profile:
+    id: str
     balance: float
     earn_per_hour: float
     earn_per_sec: float
@@ -19,6 +20,7 @@ class Profile:
     last_energy_boost_time: int
 
     def __init__(self, data: dict):
+        self.id = data.get('id')
         self.balance = data.get('balanceCoins', 0)
         self.earn_per_hour = data.get('earnPassivePerHour', 0)
         self.earn_per_sec = data.get('earnPassivePerSec', 0)
@@ -139,11 +141,37 @@ class DailyCipher:
 
 
 @dataclass
+class DailyKeysMiniGame:
+    start_date: str
+    level_config: str
+    youtube_url: str
+    bonus_keys: int
+    is_claimed: bool
+    total_seconds_to_next_attempt: int
+    remain_seconds_to_guess: float
+    remain_seconds: float
+    remain_seconds_to_next_attempt: float
+
+    def __init__(self, data: dict):
+        self.start_date = data["startDate"]
+        self.level_config = data["levelConfig"]
+        self.youtube_url = data["youtubeUrl"]
+        self.bonus_keys = data["bonusKeys"]
+        self.is_claimed = data["isClaimed"]
+        self.total_seconds_to_next_attempt = data["totalSecondsToNextAttempt"]
+        self.remain_seconds_to_guess = data["remainSecondsToGuess"]
+        self.remain_seconds = data["remainSeconds"]
+        self.remain_seconds_to_next_attempt = data["remainSecondsToNextAttempt"]
+
+
+@dataclass
 class Config:
     daily_cipher: DailyCipher
+    daily_keys_mini_game: DailyKeysMiniGame
 
     def __init__(self, data: dict):
         self.daily_cipher = DailyCipher(data=data["dailyCipher"])
+        self.daily_keys_mini_game = DailyKeysMiniGame(data=data["dailyKeysMiniGame"])
 
 
 class SleepReason(Enum):

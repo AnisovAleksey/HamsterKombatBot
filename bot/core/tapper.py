@@ -14,6 +14,7 @@ from bot.core.entities import Upgrade, Profile, Boost, Task, Config, DailyCombo,
 from bot.core.headers import headers
 from bot.core.web_client import WebClient
 from bot.exceptions import InvalidSession
+from bot.core.actions.daily_keys_mini_game import get_keys_mini_game_cipher
 from bot.utils import logger
 from bot.utils.client import Client
 
@@ -52,8 +53,11 @@ class Tapper:
             if status is True:
                 logger.success(f"{self.session_name} | Successfully selected exchange <y>Bybit</y>")
 
-        logger.info(f"{self.session_name} | Last passive earn: <g>+{self.profile.last_passive_earn}</g> | "
-                    f"Earn every hour: <y>{self.profile.earn_per_hour}</y>")
+        logger.info(f"{self.session_name} | "
+                    f"User id: <y>{self.profile.id}</y>"
+                    f"Last passive earn: <g>+{self.profile.last_passive_earn}</g> | "
+                    f"Earn every hour: <y>{self.profile.earn_per_hour}</y>"
+                    f"Balance: <y>{self.profile.balance}</y>")
 
     async def try_claim_daily_combo(self) -> bool:
         if self.daily_combo.is_claimed:
@@ -218,6 +222,9 @@ class Tapper:
                 # DAILY CIPHER
                 await self.check_daily_cipher(config=config)
 
+                # KEYS MINI-GAME
+                await self.check_daily_keys_mini_game(config=config)
+
                 # TASKS COMPLETING
                 for task in self.tasks:
                     if task.is_completed is False:
@@ -283,6 +290,20 @@ class Tapper:
                 logger.error(f"{self.session_name} | Unknown error: {error}")
                 traceback.print_exc()
                 await self.sleep(delay=3)
+
+    async def check_daily_keys_mini_game(self, config):
+        if config.daily_keys_mini_game.is_claimed:
+            return
+
+        remain_seconds = config.daily_keys_mini_game.remain_seconds_to_next_attempt
+        if remain_seconds > 0:
+            logger.info(f"{self.session_name} | Daily keys mini-game will be available after {remain_seconds} seconds")
+            return
+
+        await self.web_client.start_keys_minigame()
+        await self.sleep(delay=randint(5, 15))
+        await self.web_client.claim_daily_keys_minigame(cipher=get_keys_mini_game_cipher(config, self.profile.id))
+        logger.info(f"{self.session_name} | Daily keys mini-game successfully finished")
 
 
 async def run_tapper(client: Client, proxy: str | None):

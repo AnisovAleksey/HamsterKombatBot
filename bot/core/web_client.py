@@ -30,6 +30,8 @@ class Requests(StrEnum):
     REFERRAL_STAT = f"{API_URL}/clicker/referral-stat"
     LIST_AIRDROP_TASKS = f"{API_URL}/clicker/list-airdrop-tasks"
     CHECK_AIRDROP_TASK = f"{API_URL}/clicker/check-airdrop-task"
+    START_KEYS_MINIGAME = f"{API_URL}/clicker/start-keys-minigame"
+    CLAIM_DAILY_KEYS_MINIGAME = f"{API_URL}/clicker/claim-daily-keys-minigame"
 
 
 class WebClient:
@@ -124,6 +126,15 @@ class WebClient:
         response = await self.make_request(Requests.CHECK_AIRDROP_TASK,
                                            json={'id': AirDropTaskId.CONNECT_TON_WALLET, 'walletAddress': wallet})
         return response.get('airdropTask', {}).get('isCompleted', False)
+
+    async def start_keys_minigame(self):
+        await self.make_request(Requests.START_KEYS_MINIGAME)
+
+    async def claim_daily_keys_minigame(self, cipher: str) -> Profile:
+        response = await self.make_request(Requests.CLAIM_DAILY_KEYS_MINIGAME, json={'cipher': cipher})
+        if 'found' in response:
+            response = response['found']
+        return Profile(data=response.get('clickerUser'))
 
     async def get_airdrop_tasks(self) -> list[AirDropTask]:
         response = await self.make_request(Requests.LIST_AIRDROP_TASKS)
