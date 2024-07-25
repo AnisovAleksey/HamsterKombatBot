@@ -54,9 +54,9 @@ class Tapper:
                 logger.success(f"{self.session_name} | Successfully selected exchange <y>Bybit</y>")
 
         logger.info(f"{self.session_name} | "
-                    f"User id: <y>{self.profile.id}</y>"
+                    f"User id: <y>{self.profile.id}</y> | "
                     f"Last passive earn: <g>+{self.profile.last_passive_earn}</g> | "
-                    f"Earn every hour: <y>{self.profile.earn_per_hour}</y>"
+                    f"Earn every hour: <y>{self.profile.earn_per_hour}</y> | "
                     f"Balance: <y>{self.profile.balance}</y>")
 
     async def try_claim_daily_combo(self) -> bool:
