@@ -15,7 +15,7 @@ from bot.core.headers import headers
 from bot.core.web_client import WebClient
 from bot.exceptions import InvalidSession
 from bot.core.actions.daily_keys_mini_game import get_keys_mini_game_cipher
-from bot.utils import logger
+from bot.utils import logger, format_number
 from bot.utils.client import Client
 
 
@@ -55,9 +55,9 @@ class Tapper:
 
         logger.info(f"{self.session_name} | "
                     f"User id: <y>{self.profile.id}</y> | "
-                    f"Last passive earn: <g>+{self.profile.last_passive_earn}</g> | "
-                    f"Earn every hour: <y>{self.profile.earn_per_hour}</y> | "
-                    f"Balance: <y>{self.profile.balance}</y>")
+                    f"Last passive earn: <g>+{format_number(self.profile.last_passive_earn)}</g> | "
+                    f"Earn every hour: <y>{format_number(self.profile.earn_per_hour)}</y> | "
+                    f"Balance: <y>{format_number(self.profile.balance)}</y>")
 
     async def try_claim_daily_combo(self) -> bool:
         if self.daily_combo.is_claimed:
@@ -65,8 +65,9 @@ class Tapper:
         if len(self.daily_combo.upgrade_ids) != 3:
             return False
         self.profile = await self.web_client.claim_daily_combo()
-        logger.success(f"{self.session_name} | Successfully get daily combo reward | "
-                       f"Reward coins: <g>+{self.daily_combo.bonus_coins}</g>")
+        logger.success(f"{self.session_name} | "
+                       f"Successfully get daily combo reward | "
+                       f"Reward coins: <g>+{format_number(self.daily_combo.bonus_coins)}</g>")
         await self.sleep(delay=5)
         return True
 
@@ -77,8 +78,10 @@ class Tapper:
         decoded_cipher = base64.b64decode(f"{config.daily_cipher.cipher[:3]}{config.daily_cipher.cipher[4:]}").decode(
             "utf-8")
         self.profile = await self.web_client.claim_daily_cipher(cipher=decoded_cipher)
-        logger.success(f"{self.session_name} | Successfully get cipher reward | "
-                       f"Cipher: <m>{decoded_cipher}</m> | Reward coins: <g>+{config.daily_cipher.bonus_coins}</g>")
+        logger.success(f"{self.session_name} | "
+                       f"Successfully get cipher reward | "
+                       f"Cipher: <m>{decoded_cipher}</m> | "
+                       f"Reward coins: <g>+{format_number(config.daily_cipher.bonus_coins)}</g>")
         await self.sleep(delay=5)
 
     async def make_upgrades(self):
@@ -129,7 +132,8 @@ class Tapper:
             if most_profit_upgrade.cooldown_seconds > 0:
                 logger.info(
                     f"{self.session_name} | "
-                    f"Upgrade <e>{most_profit_upgrade.name}</e> on cooldown for <y>{most_profit_upgrade.cooldown_seconds}s</y>")
+                    f"Upgrade <e>{most_profit_upgrade.name}</e> on cooldown for "
+                    f"<y>{most_profit_upgrade.cooldown_seconds:.0f}s</y>")
                 self.update_preferred_sleep(
                     delay=most_profit_upgrade.cooldown_seconds,
                     sleep_reason=SleepReason.WAIT_UPGRADE_COOLDOWN
@@ -150,7 +154,8 @@ class Tapper:
         logger.success(
             f"{self.session_name} | "
             f"Successfully upgraded <e>{upgrade.name}</e> to <m>{upgrade.level}</m> lvl | "
-            f"Earn every hour: <y>{self.profile.earn_per_hour}</y> (<g>+{upgrade.earn_per_hour}</g>)")
+            f"Earn every hour: <y>{format_number(self.profile.earn_per_hour)}</y> "
+            f"(<g>+{format_number(upgrade.earn_per_hour)}</g>)")
 
     async def apply_energy_boost(self) -> bool:
         energy_boost = next((boost for boost in self.boosts if boost.id == 'BoostFullAvailableTaps'), {})
@@ -193,7 +198,7 @@ class Tapper:
         self.profile = profile
 
         logger.success(f"{self.session_name} | Successful tapped <c>{simulated_taps}</c> times! | "
-                       f"Balance: <c>{self.profile.balance}</c> (<g>+{calc_taps}</g>)")
+                       f"Balance: <c>{format_number(self.profile.balance)}</c> (<g>+{calc_taps}</g>)")
         return True
 
     async def sleep(self, delay: int):
@@ -238,10 +243,10 @@ class Tapper:
                         if task.id == "streak_days":
                             logger.success(f"{self.session_name} | Successfully get daily reward | "
                                            f"Days: <m>{task.days}</m> | "
-                                           f"Balance: <c>{self.profile.balance}</c> (<g>+{task.reward_coins}</g>)")
+                                           f"Balance: <c>{format_number(self.profile.balance)}</c> (<g>+{format_number(task.reward_coins)}</g>)")
                         else:
                             logger.success(f"{self.session_name} | Successfully get reward for task <m>{task.id}</m> | "
-                                           f"Balance: <c>{self.profile.balance}</c> (<g>+{task.reward_coins}</g>)")
+                                           f"Balance: <c>{format_number(self.profile.balance)}</c> (<g>+{format_number(task.reward_coins)}</g>)")
 
                 # TAPPING
                 if settings.AUTO_CLICKER is True:
@@ -267,12 +272,17 @@ class Tapper:
                 # SLEEP
                 if self.preferred_sleep is not None:
                     sleep_time = max(self.preferred_sleep.delay - (time() - self.preferred_sleep.created_time), 40)
-                    if self.preferred_sleep.sleep_reason == SleepReason.WAIT_UPGRADE_MONEY:
-                        logger.info(f"{self.session_name} | Sleep {sleep_time}s for earn money for upgrades")
-                    elif self.preferred_sleep.sleep_reason == SleepReason.WAIT_UPGRADE_COOLDOWN:
-                        logger.info(f"{self.session_name} | Sleep {sleep_time}s for waiting cooldown for upgrades")
-                    elif self.preferred_sleep.sleep_reason == SleepReason.WAIT_ENERGY_RECOVER:
-                        logger.info(f"{self.session_name} | Sleep {sleep_time}s for recover full energy")
+                    match self.preferred_sleep.sleep_reason:
+                        case SleepReason.WAIT_UPGRADE_MONEY:
+                            logger.info(f"{self.session_name} | Sleep {sleep_time:.0f}s for earn money for upgrades")
+                        case SleepReason.WAIT_UPGRADE_COOLDOWN:
+                            logger.info(f"{self.session_name} | Sleep {sleep_time:.0f}s for waiting cooldown for upgrades")
+                        case SleepReason.WAIT_ENERGY_RECOVER:
+                            logger.info(f"{self.session_name} | Sleep {sleep_time:.0f}s for recover full energy")
+                        case SleepReason.WAIT_PASSIVE_EARN:
+                            logger.info(f"{self.session_name} | Sleep {sleep_time:.0f}s for earn money")
+                        case SleepReason.WAIT_DAILY_KEYS_MINI_GAME:
+                            logger.info(f"{self.session_name} | Sleep {sleep_time:.0f}s for wait daily keys mini-game")
 
                     self.preferred_sleep = None
                     await self.sleep(delay=sleep_time)
@@ -297,13 +307,18 @@ class Tapper:
 
         remain_seconds = config.daily_keys_mini_game.remain_seconds_to_next_attempt
         if remain_seconds > 0:
-            logger.info(f"{self.session_name} | Daily keys mini-game will be available after {remain_seconds} seconds")
+            logger.info(f"{self.session_name} | Daily keys mini-game will be available after {remain_seconds:.0f} seconds")
+            self.update_preferred_sleep(
+                delay=remain_seconds,
+                sleep_reason=SleepReason.WAIT_DAILY_KEYS_MINI_GAME
+            )
             return
 
         await self.web_client.start_keys_minigame()
         await self.sleep(delay=randint(5, 15))
-        await self.web_client.claim_daily_keys_minigame(cipher=get_keys_mini_game_cipher(config, self.profile.id))
-        logger.info(f"{self.session_name} | Daily keys mini-game successfully finished")
+        self.profile = await self.web_client.claim_daily_keys_minigame(cipher=get_keys_mini_game_cipher(config, self.profile.id))
+        logger.info(f"{self.session_name} | Daily keys mini-game successfully finished | "
+                    f"Total keys: {self.profile.balance_keys}")
 
 
 async def run_tapper(client: Client, proxy: str | None):

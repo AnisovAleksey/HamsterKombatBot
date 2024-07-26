@@ -18,6 +18,7 @@ class Profile:
     last_passive_earn: float
     exchange_id: str | None
     last_energy_boost_time: int
+    balance_keys: int
 
     def __init__(self, data: dict):
         self.id = data.get('id')
@@ -30,6 +31,7 @@ class Profile:
         self.max_energy = data.get('maxTaps', 0)
         self.last_passive_earn = data.get('lastPassiveEarn', 0)
         self.exchange_id = data.get('exchangeId')
+        self.balance_keys = data.get('balanceKeys', 0)
         try:
             self.last_energy_boost_time = next(
                 (boost for boost in data["boosts"] if boost['id'] == 'BoostFullAvailableTaps'), {}
@@ -179,6 +181,7 @@ class SleepReason(Enum):
     WAIT_UPGRADE_MONEY = 2
     WAIT_ENERGY_RECOVER = 3
     WAIT_PASSIVE_EARN = 4
+    WAIT_DAILY_KEYS_MINI_GAME = 5
 
 
 @dataclass
